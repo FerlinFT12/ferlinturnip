@@ -6,6 +6,8 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    // Sesuaikan dengan nama repository Anda
+    base: '/ferlinturnip-new/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
