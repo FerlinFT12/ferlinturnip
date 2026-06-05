@@ -3,12 +3,14 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  // Use /ferlinturnip/ only for production build command, localhost uses /
+  const base = command === 'build' && process.env.DEPLOY_ENV === 'github-pages' ? '/ferlinturnip/' : '/';
   return {
     plugins: [react(), tailwindcss()],
     // Sesuaikan dengan nama repository Anda
-    base: process.env.NODE_ENV === 'production' ? '/ferlinturnip/' : '/',
+    base: base,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
@@ -20,7 +22,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_URL),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.GEMINI_API_URL': JSON.stringify(env.GEMINI_API_URL),
     },
   };
 });
