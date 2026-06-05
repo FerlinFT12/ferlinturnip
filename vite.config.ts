@@ -7,7 +7,7 @@ export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
     // Sesuaikan dengan nama repository Anda
-    base: '/ferlinturnip-new/',
+    base: '/ferlinturnip/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
