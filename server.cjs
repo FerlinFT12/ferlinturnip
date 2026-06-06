@@ -1,23 +1,39 @@
-import express from "express";
-import path from "path";
-import dotenv from "dotenv";
-import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 
-dotenv.config();
-
-// Create Express application
+// server.ts
+var import_express = __toESM(require("express"), 1);
+var import_path = __toESM(require("path"), 1);
+var import_dotenv = __toESM(require("dotenv"), 1);
+var import_vite = require("vite");
+var import_genai = require("@google/genai");
+import_dotenv.default.config();
 async function startServer() {
-  const app = express();
-  const PORT = 3000;
-
-  // Body parsers
-  app.use(express.json({ limit: "5mb" }));
-  app.use(express.urlencoded({ extended: true, limit: "5mb" }));
-
-  // Initialize Gemini client (Lazy loaded check)
-  let aiClient: GoogleGenAI | null = null;
-  
+  const app = (0, import_express.default)();
+  const PORT = 3e3;
+  app.use(import_express.default.json({ limit: "5mb" }));
+  app.use(import_express.default.urlencoded({ extended: true, limit: "5mb" }));
+  let aiClient = null;
   function getAiClient() {
     if (!aiClient) {
       const apiKey = process.env.GEMINI_API_KEY;
@@ -25,36 +41,28 @@ async function startServer() {
         console.warn("WARNING: GEMINI_API_KEY environment variable is not defined. SEO optimization features will fall back to local heuristics.");
         return null;
       }
-      aiClient = new GoogleGenAI({
-        apiKey: apiKey,
+      aiClient = new import_genai.GoogleGenAI({
+        apiKey,
         httpOptions: {
           headers: {
-            "User-Agent": "aistudio-build",
-          },
-        },
+            "User-Agent": "aistudio-build"
+          }
+        }
       });
     }
     return aiClient;
   }
-
-  // API 1: Healthcheck
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", time: new Date().toISOString() });
+    res.json({ status: "ok", time: (/* @__PURE__ */ new Date()).toISOString() });
   });
-
-  // API 2: Automated SEO Metadata Generation API (Uses server-side Gemini 3.5 Flash)
   app.post("/api/seo/optimize", async (req, res) => {
     try {
       const { title, category, content } = req.body;
-
       if (!title || !content) {
         return res.status(400).json({ error: "Title and Content are required to run SEO optimization." });
       }
-
       const client = getAiClient();
-      
       if (!client) {
-        // Fallback to local heuristic recommendations if GEMINI_API_KEY is missing (e.g., initial startup without key)
         const localKeywords = [
           category || "IT Professional",
           "System Analyst",
@@ -62,7 +70,6 @@ async function startServer() {
           "Ferlin Firdaus Turnip"
         ];
         const localDesc = `${title.substring(0, 120)}... Sampaikan pandangan ahli dan profesional dari Ferlin Firdaus Turnip.`;
-        
         return res.json({
           title: `${title} | Ferlin Firdaus Turnip`,
           description: localDesc,
@@ -85,7 +92,6 @@ async function startServer() {
           ]
         });
       }
-
       const systemPrompt = `You are a professional Generative Engine Optimization (GEO) and Technical SEO consultant. 
 Your task is to analyze an expert article written by "Ferlin Firdaus Turnip" (IT Project Manager & Enterprise Architect) and generate perfectly optimized SEO metadata structures:
 - An optimized Meta Title (under 60 characters, containing main keyword and branding suffix e.g. " | Ferlin Turnip").
@@ -96,7 +102,6 @@ Your task is to analyze an expert article written by "Ferlin Firdaus Turnip" (IT
 - 3 actionable, technical suggestions to improve search ranking or search visibility (specifically detailing structural improvements, keyword positioning, or heading additions).
 
 Do not output any introductory or conversational text, return only the structured JSON output adhering to the schema.`;
-
       const userPrompt = `Analyze this article and generate the metadata:
 Title: "${title}"
 Category: "${category || "IT Professional"}"
@@ -104,7 +109,6 @@ Content:
 """
 ${content}
 """`;
-
       const response = await client.models.generateContent({
         model: "gemini-3.5-flash",
         contents: userPrompt,
@@ -112,78 +116,67 @@ ${content}
           systemInstruction: systemPrompt,
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: import_genai.Type.OBJECT,
             properties: {
               title: {
-                type: Type.STRING,
-                description: "Meta title tag contents, optimized, max 60 characters.",
+                type: import_genai.Type.STRING,
+                description: "Meta title tag contents, optimized, max 60 characters."
               },
               description: {
-                type: Type.STRING,
-                description: "Meta description contents, optimized for clicks, max 160 characters.",
+                type: import_genai.Type.STRING,
+                description: "Meta description contents, optimized for clicks, max 160 characters."
               },
               focusKeywords: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "3 to 5 primary search terms derived from the article content.",
+                type: import_genai.Type.ARRAY,
+                items: { type: import_genai.Type.STRING },
+                description: "3 to 5 primary search terms derived from the article content."
               },
               schemaMarkup: {
-                type: Type.STRING,
-                description: "Entire JSON-LD structured data script contents as a stringified block, strictly valid JSON format.",
+                type: import_genai.Type.STRING,
+                description: "Entire JSON-LD structured data script contents as a stringified block, strictly valid JSON format."
               },
               seoScore: {
-                type: Type.INTEGER,
-                description: "Heuristic SEO quality score from 1 to 100.",
+                type: import_genai.Type.INTEGER,
+                description: "Heuristic SEO quality score from 1 to 100."
               },
               suggestions: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "3 technical or semantic suggestions to align with Search Generative Experience (SGE) or traditional search crawler standards.",
-              },
+                type: import_genai.Type.ARRAY,
+                items: { type: import_genai.Type.STRING },
+                description: "3 technical or semantic suggestions to align with Search Generative Experience (SGE) or traditional search crawler standards."
+              }
             },
-            required: ["title", "description", "focusKeywords", "schemaMarkup", "seoScore", "suggestions"],
-          },
-        },
+            required: ["title", "description", "focusKeywords", "schemaMarkup", "seoScore", "suggestions"]
+          }
+        }
       });
-
       const responseText = response.text || "{}";
       const resultObj = JSON.parse(responseText.trim());
-      
       return res.json(resultObj);
-
-    } catch (error: any) {
+    } catch (error) {
       console.error("SEO Optimization Gemini tool failed:", error);
       return res.status(500).json({ error: "Failed to perform automated SEO analysis.", details: error.message });
     }
   });
-
-  // Vite Integration
   if (process.env.NODE_ENV !== "production") {
     console.log("Using Vite development middleware...");
-    const vite = await createViteServer({
+    const vite = await (0, import_vite.createServer)({
       server: { middlewareMode: true },
-      appType: "spa",
+      appType: "spa"
     });
     app.use(vite.middlewares);
   } else {
     console.log("Using production static file delivery...");
-    const distPath = path.join(process.cwd(), "dist");
-    
-    // Serve static files from the build directory
-    app.use(express.static(distPath));
-    
-    // Fallback everything to index.html for Single Page Application handling
+    const distPath = import_path.default.join(process.cwd(), "dist");
+    app.use(import_express.default.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      res.sendFile(import_path.default.join(distPath, "index.html"));
     });
   }
-
-  // Bind and listen
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Fullstack Port Host loaded on http://localhost:${PORT}`);
   });
 }
-
 startServer().catch((err) => {
   console.error("Critical server startup failure:", err);
 });
+//# sourceMappingURL=server.cjs.map
