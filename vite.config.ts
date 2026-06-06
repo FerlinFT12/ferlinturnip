@@ -5,8 +5,9 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  // Use /ferlinturnip/ only for production build command, localhost uses /
-  const base = command === 'build' && process.env.DEPLOY_ENV === 'github-pages' ? '/ferlinturnip/' : '/';
+  // Use /ferlinturnip/ for production builds so assets load on GitHub Pages
+  // and '/' for dev server/localhost.
+  const base = command === 'build' ? '/ferlinturnip/' : '/';
   return {
     plugins: [react(), tailwindcss()],
     // Sesuaikan dengan nama repository Anda
